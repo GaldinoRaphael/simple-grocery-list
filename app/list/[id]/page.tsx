@@ -19,18 +19,27 @@ interface GroceryItem {
   createdAt: number;
 }
 
+const VALID_LIST_ID = /^[a-zA-Z0-9_-]{6,32}$/;
+
 export default function ListPage() {
   const params = useParams();
   const router = useRouter();
-  const listId = params.id as string;
+  const rawId = params.id as string;
+  const listId = VALID_LIST_ID.test(rawId) ? rawId : null;
 
   const [items, setItems] = useState<GroceryItem[]>([]);
   const [inputValue, setInputValue] = useState("");
   const [copied, setCopied] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // Guard: invalid list ID → redirect home
+  useEffect(() => {
+    if (!listId) router.replace("/");
+  }, [listId, router]);
+
   // Real-time sync from Firebase
   useEffect(() => {
+    if (!listId) return;
     const itemsRef = ref(db, `lists/${listId}/items`);
     const unsubscribe = onValue(itemsRef, (snapshot) => {
       const data = snapshot.val();
@@ -54,8 +63,8 @@ export default function ListPage() {
 
   function handleAddItem(e: React.FormEvent) {
     e.preventDefault();
-    const name = inputValue.trim();
-    if (!name) return;
+    const name = inputValue.trim().slice(0, 200);
+    if (!name || !listId) return;
 
     const optimisticId = nanoid();
     const newItem: GroceryItem = {
