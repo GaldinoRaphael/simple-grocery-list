@@ -115,6 +115,13 @@ export default function ListPage() {
     });
   }
 
+  async function handleDeleteItem(itemId: string) {
+    if (!listId) return;
+
+    setItems((prev) => prev.filter((item) => item.id !== itemId));
+    await remove(ref(db, `lists/${listId}/items/${itemId}`));
+  }
+
   async function handleCopyLink() {
     try {
       await navigator.clipboard.writeText(window.location.href);
@@ -207,24 +214,39 @@ export default function ListPage() {
           <Card className="shadow-md">
             <CardContent className="p-0 divide-y divide-slate-100">
               {items.map((item) => (
-                <label
+                <div
                   key={item.id}
-                  className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-slate-50 transition-colors"
+                  className="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 transition-colors"
                 >
-                  <Checkbox
-                    checked={item.checked}
-                    onCheckedChange={() => handleToggleItem(item)}
-                    id={`item-${item.id}`}
-                  />
-                  <span
-                    className={cn(
-                      "flex-1 text-sm",
-                      item.checked && "line-through opacity-50"
-                    )}
+                  <label
+                    htmlFor={`item-${item.id}`}
+                    className="flex flex-1 cursor-pointer items-center gap-3"
                   >
-                    {item.name}
-                  </span>
-                </label>
+                    <Checkbox
+                      checked={item.checked}
+                      onCheckedChange={() => handleToggleItem(item)}
+                      id={`item-${item.id}`}
+                    />
+                    <span
+                      className={cn(
+                        "flex-1 text-sm",
+                        item.checked && "line-through opacity-50"
+                      )}
+                    >
+                      {item.name}
+                    </span>
+                  </label>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    aria-label={`Excluir ${item.name}`}
+                    className="text-slate-400 hover:text-red-600"
+                    onClick={() => handleDeleteItem(item.id)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
               ))}
             </CardContent>
           </Card>
