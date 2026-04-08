@@ -195,7 +195,7 @@ export default function ListPage() {
                 onClick={handleCopyLink}
               >
                 {copied ? <Link2 className="h-4 w-4" /> : <ClipboardCopy className="h-4 w-4" />}
-                <span className="hidden sm:inline">{copied ? "Copiado" : "Copiar link"}</span>
+                <span>{copied ? "Copiado" : "Compartilhar"}</span>
               </Button>
             </div>
           </header>
